@@ -14,14 +14,14 @@ if os.name=='nt':
             key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path)
         except WindowsError:
             raise IterationError
-    
+
         for i in itertools.count():
             try:
                 val = winreg.EnumValue(key, i)
                 yield str(val[1])
             except EnvironmentError:
                 break
-            
+
     import re
     def full_port_name(portname):
         """ Given a port-name (of the form COM7,
@@ -33,7 +33,7 @@ if os.name=='nt':
         if m and int(m.group(1)) < 10:
             return portname
         return '\\\\.\\' + portname
-    
+
     def serialPortList():
         return [full_port_name(port) for port in list(enumerate_serial_ports())]
 else:

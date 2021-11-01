@@ -1,5 +1,4 @@
-import serial
-import serialPorts
+from serialPorts import *
 
 # QUESTIONS:
 #     -How to read/write words of data? For Bulk Read and Sync Write?
@@ -24,13 +23,13 @@ class Dynamixel:
     # Definition of private class attributes, accessible only within own class
     #---------------------------------------------------------------------------
     # Define dynamixel constants
-    __DYNAMIXEL_PORT_NR = 0                                                     # Index of dynamixel line in list
+    __DYNAMIXEL_PORT_NR = 1                                                     # Index of dynamixel line in list
     __BAUDRATE = 1000000                                                        # Baudrate of dynamixel serial line
     __TIME_OUT_DEFAULT = 2                                                      # Default time out
     __DIRECT_ACTION = 3                                                         # Direct action command
     __TRIGGERT_ACTION = 4                                                       # Triggered action command
     __STATUS_PACKET_BASE_LENGTH = 6                                             # Base length of status packet
-    __lines = serialPorts.serialPortList()                                      # Contains all available serial lines
+    __lines = serialPortList()                                                  # Contains all available serial lines
     __serial_port = serial.Serial(__lines[__DYNAMIXEL_PORT_NR],
                                   __BAUDRATE, timeout = __TIME_OUT_DEFAULT)   # Serial line object
     # Create templates of command packets 
@@ -90,15 +89,15 @@ class Dynamixel:
 
     # Read status packet, set error value and get return values from servo
     # nByte -> number of bytes to read
-    # dont know difference to __doReadStatusPkt
     def __readStatusPkt(self, nByte):
+        #dont know difference to __doReadStatusPkt
         pass
 
     # Calculates check sum of packet list
     def __checkSum(self, pkt):
         ### Implementierungsstart ###
         return (~sum(pkt[2:-1])) & 0XFF
-    
+
     # Read status packet, set error value and get return values from servo
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
@@ -123,17 +122,17 @@ class Dynamixel:
     def _requestNWord(self, register, dtWlen = 1):
         pass
 
-    
+
     # Sends packet to servo in order to write n data bytes into servo memory
     # register -> register address of servo
     # data     -> list of bytes to write
     # trigger  -> False -> command is directly executed, True -> command is delayed until action command
     #__pktWriteNByte = [255, 255, 0, 0, 3, 0]
     def _writeNBytePkt(self, register, data, trigger):
-        pktWriteNByte = self.__pktWriteNByte
+        pktWriteNByte = Dynamixel.__pktWriteNByte
         pktWriteNByte[2] = self.id
 
-        pktWriteNByte.extend([0]*len(data)+1)
+        pktWriteNByte.extend([0]*(len(data)+1))
 
         pktWriteNByte[3] = len(data)+2 # number of bytes
 
@@ -150,11 +149,12 @@ class Dynamixel:
             i += 1
 
         pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
-        self.__serial_port.write(pktWriteNByte) #write pkt to servo
+        self.__serial_port.write(bytearray(pktWriteNByte)) #write pkt to servo
+        print("SEND:" + str(pktWriteNByte))
 
 
 
-    
+
     # Sends packet to servo in order to write data dword into servo memory
     # register -> register address of servo
     # data     -> list of words to write
@@ -186,14 +186,14 @@ class Dynamixel:
 
 
 
-    
+
     # Definition of public methods with implicit servo-id
     # Accessible from everywere    
     #---------------------------------------------------------------------------
     # Show available serial lines
     def showSerialLines(self):
         print(Dynamixel.__lines)
-        
+
     # Start predefined action on servo with assigned id
     def action(self):
         return self.__doAction(self.id)
@@ -204,4 +204,4 @@ class Dynamixel:
     # Get last error    
     def getLastError(self):
         return self.error
-        
+

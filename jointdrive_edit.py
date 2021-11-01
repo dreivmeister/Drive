@@ -4,7 +4,7 @@ from servo_ax12a_edit import *
 # -do some factoring
 
 
-        
+
 # Class definition of ax12a-controller class, defines interface to the robot
 #===============================================================================
 # Implements the interface between leg- and servo class
@@ -26,7 +26,7 @@ class JointDrive(ServoAx12a):
 
     _ANGLE_UNIT = ServoAx12a._ANGLE_MAX_TICKS / ((ServoAx12a._ANGLE_MAX_DEGREE -
                                                   ServoAx12a._ANGLE_MIN_DEGREE) * math.pi * 2 / 360)     # Ticks per rad
-    
+
     # Private methods    
     #----------------------------------------------------------------------
     # Constructor, defines the folowing variables: counterClockWise, angleOffset, angleMax, angleMin
@@ -36,7 +36,8 @@ class JointDrive(ServoAx12a):
         ### Implementierungsstart ###
         ### ID reicht erst einmal ###
         self.id = id
-    
+        super().__init__(self.id)
+
 
     # Converts angle in radian to servo ticks
     # angle -> in radian, returns angle in servo ticks
@@ -55,7 +56,7 @@ class JointDrive(ServoAx12a):
     # speed -> value in rpm
     def __convertSpeedToTicks(self, speed):
         return speed * (1/ServoAx12a._SPEED_UNIT)
-    
+
     # Converts ticks to speed in rpm
     # ticks -> servo ticks
     def __convertTicksToSpeed(self, ticks):
@@ -73,9 +74,9 @@ class JointDrive(ServoAx12a):
     # Set servo to desired angle
     # angle -> in radian,
     def setDesiredJointAngle(self, angle, trigger = False):
-        if angle > ServoAx12a._ANGLE_MAX_DEGREE or angle < ServoAx12a._ANGLE_MIN_DEGREE:
+        if angle[0] > ServoAx12a._ANGLE_MAX_DEGREE or angle[0] < ServoAx12a._ANGLE_MIN_DEGREE:
             return
-        ServoAx12a.setGoalPosition(angle, trigger)
+        ServoAx12a.setGoalPosition(self, angle, trigger)
 
     # Set speed value of servo
     # speed -> angle speed in rpm

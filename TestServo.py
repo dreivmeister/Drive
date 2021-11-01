@@ -1,16 +1,20 @@
 import time
+
 import serial
+
 import serialPorts
+from jointdrive_edit import *
 import math
-import jointdrive_edit
+
 
 # create serial port connection
-#l = serialPorts.serialPortList()
-#print(l)
-#port = serial.Serial(port=str(l[0]), baudrate=1000000)
+# l = serialPorts.serialPortList()
+# print(l)
+# port = serial.Serial(port=str(l[1]), baudrate=1000000)
 
 
-# auxiliary methods
+
+# #auxiliary methods
 # def calcCheckSum(pkt):
 #     s = sum(pkt[2:-1])                              # add all values from servo-id to last parameter
 #     return (~s) & 0xFF                              # invert sum bit-wise and limit to byte range
@@ -20,15 +24,14 @@ import jointdrive_edit
 #     port.write(bytearray(command))                  # send command to serial line
 #     print("send:", command)
 
-angleUnit = 1023 / ((300 - 0) * math.pi * 2 / 360)
-print(angleUnit)
-def convAngleTicks(angle):
-    return angle * angleUnit
-def convTicksAngle(ticks):
-    return ticks * 1/angleUnit
 
-for i in range(0, 1023, 5):
-    print(convTicksAngle(i))
+
+# angleUnit = 1023 / ((300 - 0) * math.pi * 2 / 360)
+# print(angleUnit)
+# def convAngleTicks(angle):
+#     return angle * angleUnit
+# def convTicksAngle(ticks):
+#     return ticks * 1/angleUnit
 
 
 # # main programm
@@ -85,10 +88,15 @@ for i in range(0, 1023, 5):
 
 
 #set to position 200
-position = 200
-position1 = 10
-id = 10
-servo = jointdrive_edit.JointDrive(id)
+position = [200, 100]
+position1 = [10]
+id = 11
+
+servo = JointDrive(id)
 servo.setDesiredJointAngle(position, False)
-time.sleep(1)
-servo.setDesiredJointAngle(position1, False)
+
+
+
+
+# time.sleep(1)
+# servo.setGoalPosition(position1)
