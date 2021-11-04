@@ -67,6 +67,7 @@ class Dynamixel:
     # Prepares and sends packet to servo in order to read data from servo memory
     # register -> register address of servo
     # nByte    -> number of bytes to read
+    #__pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]
     def __writeReadDataPkt(self, register, nByte):
         pktReadData = self.__pktReadData # copy base pkt
 
@@ -74,24 +75,17 @@ class Dynamixel:
 
         pktReadData[3] = nByte + 2
 
-        #split register in low and high byte
-        pktReadData[5] = register & 255
-        pktReadData[6] = register >> 8
+        pktReadData[5] = register #place reigster
 
         pktReadData[7] = self.__checkSum(pktReadData) #calc check sum
 
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
+        print("SEND: " + str(pktReadData))
         pktStatus = self.__serial_port.read(nByte)
         self.error = pktStatus[4] #set error byte
+        print("READ" + str(pktStatus))
         return pktStatus[5:-1] #return parameters
 
-
-
-    # Read status packet, set error value and get return values from servo
-    # nByte -> number of bytes to read
-    def __readStatusPkt(self, nByte):
-        #dont know difference to __doReadStatusPkt
-        pass
 
     # Calculates check sum of packet list
     def __checkSum(self, pkt):
@@ -116,13 +110,6 @@ class Dynamixel:
         return self.__writeReadDataPkt(register, dtLen)
 
 
-    # Read data word from servo memory
-    # register -> register address of servo
-    # dtWLen   -> number of data words to read
-    def _requestNWord(self, register, dtWlen = 1):
-        pass
-
-
     # Sends packet to servo in order to write n data bytes into servo memory
     # register -> register address of servo
     # data     -> list of bytes to write
@@ -132,9 +119,9 @@ class Dynamixel:
         pktWriteNByte = Dynamixel.__pktWriteNByte
         pktWriteNByte[2] = self.id
 
-        pktWriteNByte.extend([0]*(len(data)+1))
+        pktWriteNByte.extend([0]*(len(data)+1)) #data byte(s) + register byte
 
-        pktWriteNByte[3] = len(data)+2 # number of bytes
+        pktWriteNByte[3] = len(data)+2 # number of bytes (register + data bytes + checksum)
 
         pktWriteNByte[5] = register # register address at instruction
 
@@ -144,13 +131,20 @@ class Dynamixel:
         #place bytes
         #start at index 6
         i = 6
-        for byte in data:
-            pktWriteNByte[i] = byte
-            i += 1
+        if len(data) == 1:
+            pktWriteNByte[i] = data[0]
+        else:
+            for byte in data:
+                pktWriteNByte[i] = byte
+                i += 1
+
 
         pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
         self.__serial_port.write(bytearray(pktWriteNByte)) #write pkt to servo
         print("SEND:" + str(pktWriteNByte))
+
+
+
 
 
 
@@ -183,9 +177,19 @@ class Dynamixel:
 
         self.__serial_port.write(pktWriteWord) #write pkt to servo
 
+        # Read data word from servo memory
+        # register -> register address of servo
+        # dtWLen   -> number of data words to read
+
+    def _requestNWord(self, register, dtWlen=1):
+        pass
 
 
-
+    # Read status packet, set error value and get return values from servo
+    # nByte -> number of bytes to read
+    def __readStatusPkt(self, nByte):
+        #dont know difference to __doReadStatusPkt
+        pass
 
     # Definition of public methods with implicit servo-id
     # Accessible from everywere    

@@ -39,7 +39,7 @@ class ServoAx12a(Dynamixel):
     # Definition of public class attributes
     #----------------------------------------------------------------------
     # Definition of valid return levels
-    RETURN_LEVEL_PING_COMMAND = 0                                               # Status packet is only returned for pong
+    RETURN_LEVEL_PING_COMMAND = 0                                               # Status packet is only returned for ping
     RETURN_LEVEL_READ_COMMANDS = 1                                              # Status packet is returned for ping and read requests
     RETURN_LEVEL_ALL_COMMANDS = 2                                               # Status packet is returned for ping, read requests and writes
     # Defines the wait time the servo switches from receive to send mode
@@ -71,7 +71,7 @@ class ServoAx12a(Dynamixel):
     # Get goal position
     # returns: value of 0 to 1023, the unit is 0.29 degree.
     def getGoalPosition(self):
-        GoalPosition = Dynamixel._requestNByte(self.__GOAL_POSITION, 2) #has to return something
+        GoalPosition = Dynamixel._requestNByte(self, self.__GOAL_POSITION, 2) #has to return something
         return GoalPosition * self._ANGLE_UNIT
 
     # Get moving speed
@@ -79,21 +79,20 @@ class ServoAx12a(Dynamixel):
     #          If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
     #          If it is 1023, it is about 114rpm.
     def getMovingSpeed(self):
-        MovingSpeed = Dynamixel._requestNByte(self.__MOVING_SPEED, 2)
+        MovingSpeed = Dynamixel._requestNByte(self, self.__MOVING_SPEED, 2)
         return MovingSpeed * self._SPEED_UNIT
 
     # Get present position
     # returns: value of 0 to 1023, the unit is 0.29 degree.
     def getPresentPosition(self):
-        PresentPosition = Dynamixel._requestNByte(self.__PRESENT_POSITION, 2)
-        return PresentPosition * self._ANGLE_UNIT
+        return Dynamixel._requestNByte(self, self.__PRESENT_POSITION, 2)
 
     # Get present speeed
     # returns: 0 to 1023, the unit is about 0.111rpm.
     #          If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
     #          If it is 1023, it is about 114rpm.
     def getPresentSpeed(self):
-        PresentSpeed = Dynamixel._requestNByte(self.__PRESENT_SPEED, 2)
+        PresentSpeed = Dynamixel._requestNByte(self, self.__PRESENT_SPEED, 2)
         return PresentSpeed * self._SPEED_UNIT
 
     # Get Goal position and speed, returns: [position, speed]
@@ -119,25 +118,27 @@ class ServoAx12a(Dynamixel):
     # delay: 0 to 254 (0xFE) can be used, and the delay time per data value is 2 usec.
     def setReturnDelay(self, delay, trigger = False):
         self.__RETURN_DELAY_TIME = delay
+        Dynamixel._writeNBytePkt(self, self.__RETURN_DELAY_TIME, [delay], trigger)
 
     # Set status return level
     # 0->No return against all commands (Except PING Command), 1->Return only for the READ command, 2->Return for all commands
     def setReturnLevel(self, level, trigger = False):
         self.__RETURN_LEVEL = level
+        Dynamixel._writeNBytePkt(self, self.__RETURN_LEVEL, [level], trigger)
 
 
 
     # Set goal position
-    # position: 0 to 1023 is available. The unit is 0.29 degree.
+    # position: motor ticks
     def setGoalPosition(self, position, trigger = False):
-        Dynamixel._writeNBytePkt(self, ServoAx12a.__GOAL_POSITION, position, trigger)
+        Dynamixel._writeNBytePkt(self, self.__GOAL_POSITION, position, trigger)
 
     # Set moving speed
     # speed: 0~1023 can be used, and the unit is about 0.111rpm.
     #        If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
     #        If it is 1023, it is about 114rpm.
     def setMovingSpeed(self, speed, trigger = False):
-        Dynamixel._writeNBytePkt(self.__MOVING_SPEED, speed, trigger)
+        Dynamixel._writeNBytePkt(self, self.__MOVING_SPEED, speed, trigger)
 
     # Set goal position and speed
     # position: 0 to 1023 is available. The unit is 0.29 degree.

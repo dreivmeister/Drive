@@ -88,15 +88,18 @@ import math
 
 
 #set to position 200
-position = [200, 100]
+position = [200, 100] #angle in degree
 position1 = [10]
+speed = [10]
 id = 11
+
 
 servo = JointDrive(id)
 servo.setDesiredJointAngle(position, False)
+time.sleep(1)
 
+servo.setSpeedValue(speed, False)
 
+a = servo.getCurrentJointAngle()
+print("Current Angle: " + a) #angle in radian
 
-
-# time.sleep(1)
-# servo.setGoalPosition(position1)

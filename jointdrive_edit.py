@@ -36,7 +36,17 @@ class JointDrive(ServoAx12a):
         ### Implementierungsstart ###
         ### ID reicht erst einmal ###
         self.id = id
-        super().__init__(self.id)
+        self.aOffset = aOffset
+        self.aMax = aMax
+        self.aMin = aMin
+        super().__init__(self.id) #dont know if i need this
+
+        #when initialized
+        # self.setDesiredJointAngle([150], True)
+        # self.setSpeedValue()
+        #...
+
+
 
 
     # Converts angle in radian to servo ticks
@@ -62,13 +72,17 @@ class JointDrive(ServoAx12a):
     def __convertTicksToSpeed(self, ticks):
         return ticks * ServoAx12a._SPEED_UNIT
 
+    def __convertDegreeToRadian(self, degree):
+        return degree * (math.pi/180)
+
+
     # Public methods    
     #----------------------------------------------------------------------
     # Get current angle of servo
     # returns angle in radian
     def getCurrentJointAngle(self):
-        #maybe some factoring
-        return ServoAx12a.getPresentPosition()
+        CurrentAngle = ServoAx12a.getPresentPosition()
+        return self.__convertTicksToAngle(CurrentAngle)
 
 
     # Set servo to desired angle
@@ -76,14 +90,14 @@ class JointDrive(ServoAx12a):
     def setDesiredJointAngle(self, angle, trigger = False):
         if angle[0] > ServoAx12a._ANGLE_MAX_DEGREE or angle[0] < ServoAx12a._ANGLE_MIN_DEGREE:
             return
-        ServoAx12a.setGoalPosition(self, angle, trigger)
+        ServoAx12a.setGoalPosition(self, self.__convertAngleToTicks(angle), trigger) #convert angle(rad) to motor ticks
 
     # Set speed value of servo
     # speed -> angle speed in rpm
-    def setSpeedValue(self, speed, trigger=False):
+    def setSpeedValue(self, speed = 0, trigger=False):
         if speed > ServoAx12a._SPEED_MAX_RPM or speed < 0:
             return
-        ServoAx12a.setMovingSpeed(speed, trigger)
+        ServoAx12a.setMovingSpeed(self, self.__convertSpeedToTicks(speed), trigger) #convert speed(rpm) to motor ticks
 
 
     # Set servo to desired angle and speed
