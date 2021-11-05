@@ -23,7 +23,7 @@ class Dynamixel:
     # Definition of private class attributes, accessible only within own class
     #---------------------------------------------------------------------------
     # Define dynamixel constants
-    __DYNAMIXEL_PORT_NR = 1                                                     # Index of dynamixel line in list
+    __DYNAMIXEL_PORT_NR = 2                                                     # Index of dynamixel line in list
     __BAUDRATE = 1000000                                                        # Baudrate of dynamixel serial line
     __TIME_OUT_DEFAULT = 2                                                      # Default time out
     __DIRECT_ACTION = 3                                                         # Direct action command
@@ -89,8 +89,8 @@ class Dynamixel:
 
     # Calculates check sum of packet list
     def __checkSum(self, pkt):
-        ### Implementierungsstart ###
-        return (~sum(pkt[2:-1])) & 0XFF
+        s = sum(pkt[2:-1])
+        return (~s) & 0xFF
 
     # Read status packet, set error value and get return values from servo
     # nByte -> number of bytes to read
@@ -119,11 +119,11 @@ class Dynamixel:
         pktWriteNByte = Dynamixel.__pktWriteNByte
         pktWriteNByte[2] = self.id
 
-        pktWriteNByte.extend([0]*(len(data)+1)) #data byte(s) + register byte
+        pktWriteNByte.extend([0]*4) #data byte(s) + register byte
 
-        pktWriteNByte[3] = len(data)+2 # number of bytes (register + data bytes + checksum)
+        pktWriteNByte[3] = 5 #opcode-data low-data high- +2
 
-        pktWriteNByte[5] = register # register address at instruction
+        pktWriteNByte[5] = register # register address
 
         if trigger:
             pktWriteNByte[4] = 4 # REG WRITE
@@ -131,15 +131,13 @@ class Dynamixel:
         #place bytes
         #start at index 6
         i = 6
-        if len(data) == 1:
-            pktWriteNByte[i] = data[0]
-        else:
-            for byte in data:
-                pktWriteNByte[i] = byte
-                i += 1
+        pktWriteNByte[i] = data & 255
+        pktWriteNByte[i+1] = data >> 8
+
 
 
         pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
+
         self.__serial_port.write(bytearray(pktWriteNByte)) #write pkt to servo
         print("SEND:" + str(pktWriteNByte))
 

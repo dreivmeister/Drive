@@ -8,9 +8,9 @@ import math
 
 
 # create serial port connection
-# l = serialPorts.serialPortList()
-# print(l)
-# port = serial.Serial(port=str(l[1]), baudrate=1000000)
+l = serialPorts.serialPortList()
+print(l)
+#port = serial.Serial(port=str(l[0]), baudrate=1000000)
 
 
 
@@ -88,18 +88,21 @@ import math
 
 
 #set to position 200
-position = [200, 100] #angle in degree
-position1 = [10]
-speed = [10]
-id = 11
-
-
+id = 15
+position = 200
 servo = JointDrive(id)
+
+
 servo.setDesiredJointAngle(position, False)
-time.sleep(1)
 
-servo.setSpeedValue(speed, False)
 
-a = servo.getCurrentJointAngle()
-print("Current Angle: " + a) #angle in radian
+#position = [0]  #angle in degree
+#position1 = [10]
+speed = [10]
+
+
+# servo.setSpeedValue(speed, False)
+#
+# a = servo.getCurrentJointAngle()
+# print("Current Angle: " + a) #angle in radian
 

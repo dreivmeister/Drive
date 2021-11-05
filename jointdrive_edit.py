@@ -47,13 +47,11 @@ class JointDrive(ServoAx12a):
         #...
 
 
-
-
     # Converts angle in radian to servo ticks
     # angle -> in radian, returns angle in servo ticks
     def __convertAngleToTicks(self, angle):
         ### Implementierungsstart ###
-        return angle * self._ANGLE_UNIT
+        return math.floor(angle * self._ANGLE_UNIT) #umrechnung ist falsch
 
 
     # Converts servo ticks to angle in radian
@@ -88,9 +86,10 @@ class JointDrive(ServoAx12a):
     # Set servo to desired angle
     # angle -> in radian,
     def setDesiredJointAngle(self, angle, trigger = False):
-        if angle[0] > ServoAx12a._ANGLE_MAX_DEGREE or angle[0] < ServoAx12a._ANGLE_MIN_DEGREE:
+        if angle > ServoAx12a._ANGLE_MAX_DEGREE or angle < ServoAx12a._ANGLE_MIN_DEGREE:
             return
-        ServoAx12a.setGoalPosition(self, self.__convertAngleToTicks(angle), trigger) #convert angle(rad) to motor ticks
+        angle = self.__convertAngleToTicks(angle)
+        ServoAx12a.setGoalPosition(self, angle, trigger) #convert angle(rad) to motor ticks
 
     # Set speed value of servo
     # speed -> angle speed in rpm
