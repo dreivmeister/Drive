@@ -23,7 +23,7 @@ class Dynamixel:
     # Definition of private class attributes, accessible only within own class
     #---------------------------------------------------------------------------
     # Define dynamixel constants
-    __DYNAMIXEL_PORT_NR = 2                                                     # Index of dynamixel line in list
+    __DYNAMIXEL_PORT_NR = 1                                                     # Index of dynamixel line in list
     __BAUDRATE = 1000000                                                        # Baudrate of dynamixel serial line
     __TIME_OUT_DEFAULT = 2                                                      # Default time out
     __DIRECT_ACTION = 3                                                         # Direct action command
@@ -50,6 +50,9 @@ class Dynamixel:
         self.id = id
         self.error = 0
 
+
+
+
     # Start predefined action on servo
     # execute the registered Reg Write instruction
     # id -> id of servo to ping, without id -> broadcast action
@@ -73,18 +76,25 @@ class Dynamixel:
 
         pktReadData[2] = self.id # place id
 
-        pktReadData[3] = nByte + 2
+        pktReadData[3] = nByte + 2 #nBytes+op-code+2 (len of pkt)
 
-        pktReadData[5] = register #place reigster
+        if nByte == 1:
+            pktReadData[5] = register #place register address
+        else:
+            pktReadData[5] = register & 255
+            pktReadData[6] = register >> 8
+        #dont know if we have to split both times
+
 
         pktReadData[7] = self.__checkSum(pktReadData) #calc check sum
 
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
         print("SEND: " + str(pktReadData))
-        pktStatus = self.__serial_port.read(nByte)
-        self.error = pktStatus[4] #set error byte
+
+        pktStatus = self.__doReadStatusPkt(nByte)
         print("READ" + str(pktStatus))
-        return pktStatus[5:-1] #return parameters
+
+        return pktStatus
 
 
     # Calculates check sum of packet list
@@ -97,7 +107,7 @@ class Dynamixel:
     def __doReadStatusPkt(self, nByte):
         pktReadStatus = self.__serial_port.read(nByte) # read status packet of servo
         self.error = pktReadStatus[4] # set error value with error bit
-        return pktReadStatus[5:-1] # return parameter values of status packet
+        return pktReadStatus # return parameter values of status packet
 
     # Definition of protected methods
     # Accessible within own and derived classes
@@ -119,7 +129,7 @@ class Dynamixel:
         pktWriteNByte = Dynamixel.__pktWriteNByte
         pktWriteNByte[2] = self.id
 
-        pktWriteNByte.extend([0]*4) #data byte(s) + register byte
+        pktWriteNByte.extend([0]*3) #data byte(s) + register byte
 
         pktWriteNByte[3] = 5 #opcode-data low-data high- +2
 
@@ -130,11 +140,9 @@ class Dynamixel:
 
         #place bytes
         #start at index 6
-        i = 6
-        pktWriteNByte[i] = data & 255
-        pktWriteNByte[i+1] = data >> 8
 
-
+        pktWriteNByte[6] = data & 255 #low byte
+        pktWriteNByte[7] = data >> 8 #high bytes
 
         pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
 
