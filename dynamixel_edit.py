@@ -23,7 +23,7 @@ class Dynamixel:
     # Definition of private class attributes, accessible only within own class
     #---------------------------------------------------------------------------
     # Define dynamixel constants
-    __DYNAMIXEL_PORT_NR = 1                                                     # Index of dynamixel line in list
+    __DYNAMIXEL_PORT_NR = 2                                                     # Index of dynamixel line in list
     __BAUDRATE = 1000000                                                        # Baudrate of dynamixel serial line
     __TIME_OUT_DEFAULT = 2                                                      # Default time out
     __DIRECT_ACTION = 3                                                         # Direct action command
@@ -81,8 +81,8 @@ class Dynamixel:
         if nByte == 1:
             pktReadData[5] = register #place register address
         else:
-            pktReadData[5] = register & 255
-            pktReadData[6] = register >> 8
+            pktReadData[5] = register
+            pktReadData[6] = 2 #length of data (bytes)
         #dont know if we have to split both times
 
 
@@ -91,10 +91,12 @@ class Dynamixel:
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
         print("SEND: " + str(pktReadData))
 
-        pktStatus = self.__doReadStatusPkt(nByte)
-        print("READ" + str(pktStatus))
+        pktStatus = self.__doReadStatusPkt(10)
+        for i in pktStatus:
+            print(f'{i:02x}')
+        #print(pktStatus)
 
-        return pktStatus
+        return pktStatus #daten extrahieren
 
 
     # Calculates check sum of packet list
@@ -106,7 +108,9 @@ class Dynamixel:
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
         pktReadStatus = self.__serial_port.read(nByte) # read status packet of servo
+
         self.error = pktReadStatus[4] # set error value with error bit
+
         return pktReadStatus # return parameter values of status packet
 
     # Definition of protected methods

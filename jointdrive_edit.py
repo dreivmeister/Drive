@@ -83,7 +83,7 @@ class JointDrive(ServoAx12a):
     # Get current angle of servo
     # returns angle in radian
     def getCurrentJointAngle(self):
-        CurrentAngle = ServoAx12a.getPresentPosition()
+        CurrentAngle = ServoAx12a.getPresentPosition(self)
         return self.__convertTicksToAngle(CurrentAngle)
 
 
