@@ -77,6 +77,9 @@ class JointDrive(ServoAx12a):
     def __convertDegreeToRadian(self, degree):
         return math.radians(degree)
 
+    def __convertHexToDec(self, Hex):
+        return int(Hex, 16)
+
 
     # Public methods    
     #----------------------------------------------------------------------
@@ -84,7 +87,13 @@ class JointDrive(ServoAx12a):
     # returns angle in radian
     def getCurrentJointAngle(self):
         CurrentAngle = ServoAx12a.getPresentPosition(self)
-        return self.__convertTicksToAngle(CurrentAngle)
+
+        if len(CurrentAngle) == 1:
+            word = self.__convertHexToDec(CurrentAngle[0])
+        else:
+            word = self.__convertHexToDec(((CurrentAngle[1] << 8) | CurrentAngle[0])) #put high byte and low byte together and convert to decimal
+
+        return self.__convertTicksToAngle(word) #return decimal ticks to angle in radian
 
 
     # Set servo to desired angle

@@ -89,6 +89,7 @@ class ServoAx12a(Dynamixel):
     # Get present position
     # returns: value of 0 to 1023, the unit is 0.29 degree.
     def getPresentPosition(self):
+        #return self.__writeReadDataPkt(register, dtLen)
         return Dynamixel._requestNByte(self, self.__PRESENT_POSITION, 2)
 
     # Get present speeed

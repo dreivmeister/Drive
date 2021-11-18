@@ -80,10 +80,10 @@ class Dynamixel:
 
         if nByte == 1:
             pktReadData[5] = register #place register address
+            pktReadData[6] = 1 #length of data
         else:
             pktReadData[5] = register
             pktReadData[6] = 2 #length of data (bytes)
-        #dont know if we have to split both times
 
 
         pktReadData[7] = self.__checkSum(pktReadData) #calc check sum
@@ -91,12 +91,17 @@ class Dynamixel:
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
         print("SEND: " + str(pktReadData))
 
-        pktStatus = self.__doReadStatusPkt(10)
+        pktStatus = self.__doReadStatusPkt(self.__STATUS_PACKET_BASE_LENGTH + nByte)
+
+
         for i in pktStatus:
             print(f'{i:02x}')
         #print(pktStatus)
 
-        return pktStatus #daten extrahieren
+        if nByte == 1:
+            return pktStatus[-2:-1] #data byte
+        else:
+            return pktStatus[-3:-1] #data bytes
 
 
     # Calculates check sum of packet list

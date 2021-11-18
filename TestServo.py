@@ -104,5 +104,5 @@ speed = 10 #rpm
 
 
 a = servo.getCurrentJointAngle()
-print("Current Angle: " + str(a)) #angle in radian
+print("Current Angle (rad): " + a) #angle in radian
 
