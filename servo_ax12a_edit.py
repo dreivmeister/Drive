@@ -24,7 +24,8 @@ class ServoAx12a(Dynamixel):
     __GOAL_POSITION = 0x1E                                                      # goal position, 2 byte, read/write
     __MOVING_SPEED = 0x20                                                       # moving speed, 2 byte, read/write
     __PRESENT_POSITION = 0x24                                                   # current position, 2 byte, read only
-    __PRESENT_SPEED = 0x26                                                      # current speed, 2 byte, read only	
+    __PRESENT_SPEED = 0x26                                                      # current speed, 2 byte, read only
+    #__PRESENT_TEMPERATURE =
 
     # Definition of protected class attributes
     #----------------------------------------------------------------------
@@ -97,8 +98,9 @@ class ServoAx12a(Dynamixel):
     #          If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
     #          If it is 1023, it is about 114rpm.
     def getPresentSpeed(self):
-        PresentSpeed = Dynamixel._requestNByte(self, self.__PRESENT_SPEED, 2)
-        return PresentSpeed * self._SPEED_UNIT
+        return Dynamixel._requestNByte(self, self.__PRESENT_SPEED, 2)
+
+    #def get
 
     # Get Goal position and speed, returns: [position, speed]
     # position: 0 ~ 1023, 
@@ -145,12 +147,4 @@ class ServoAx12a(Dynamixel):
     def setMovingSpeed(self, speed, trigger = False):
         Dynamixel._writeNBytePkt(self, self.__MOVING_SPEED, speed, trigger)
 
-    # Set goal position and speed
-    # position: 0 to 1023 is available. The unit is 0.29 degree.
-    # speed:    0~1023 can be used, and the unit is about 0.111rpm.
-    #           If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
-    #           If it is 1023, it is about 114rpm.
-    def setGoalPosSpeed(self, position, speed, trigger = False):
-        self.setGoalPosition(position, trigger)
-        self.setMovingSpeed(speed, trigger)
         

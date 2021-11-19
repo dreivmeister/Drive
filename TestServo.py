@@ -88,21 +88,39 @@ print(l)
 
 
 #set to position 200
-id = 15
-position = ((5/3)*math.pi)/2 #radiant
-servo = JointDrive(id)
+id = 4
+servo = JointDrive(id, ccw=True)
 
-servo.setDesiredJointAngle(position, False)
+speed = 20 #rpm
+servo.setSpeedValue(speed, False)
+
 time.sleep(2)
-#position = [0]  #angle in degree
-#position1 = [10]
-speed = 10 #rpm
 
 
-#servo.setSpeedValue(speed, False)
+position = - math.pi * (5/6) #radiant
+servo.setDesiredJointAngle(position, False)
+
+time.sleep(1)
+
+s = servo.getSpeedValue()
+print("Speed")
+print(s)
+
+# time.sleep(2)
+#
+# while servo.getCurrentJointAngle() < (position - 0.1):
+#     time.sleep(1)
+#
+# speed = 50 #rpm
+# servo.setSpeedValue(speed, False)
+#
+# time.sleep(2)
+#
+# position = 0 #radiant
+# servo.setDesiredJointAngle(position, False)
 
 
-
-a = servo.getCurrentJointAngle()
-print("Current Angle (rad): " + a) #angle in radian
+# a = servo.getCurrentJointAngle()
+# print(position)
+# print(a) #angle in radian
 
