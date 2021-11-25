@@ -1,9 +1,6 @@
 import math
 from servo_ax12a_edit import *
 
-# -do some factoring
-
-
 
 # Class definition of ax12a-controller class, defines interface to the robot
 #===============================================================================
@@ -92,7 +89,7 @@ class JointDrive(ServoAx12a):
         return self.__convertTicksToAngle(word) #return decimal ticks to angle in radian
 
     def getPresentTemperature(self):
-        pass
+        return ServoAx12a.getTemperature()
 
 
 

@@ -64,7 +64,7 @@ class Dynamixel:
         pktAction[-1] = self.__checkSum(pktAction) # place checksum
 
         self.__serial_port.write(bytearray(pktAction)) # sendCommand
-        #return pktAction
+
 
 
     # Prepares and sends packet to servo in order to read data from servo memory

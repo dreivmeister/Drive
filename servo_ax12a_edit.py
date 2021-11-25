@@ -25,7 +25,7 @@ class ServoAx12a(Dynamixel):
     __MOVING_SPEED = 0x20                                                       # moving speed, 2 byte, read/write
     __PRESENT_POSITION = 0x24                                                   # current position, 2 byte, read only
     __PRESENT_SPEED = 0x26                                                      # current speed, 2 byte, read only
-    #__PRESENT_TEMPERATURE =
+    __PRESENT_TEMPERATURE = 0x43
 
     # Definition of protected class attributes
     #----------------------------------------------------------------------
@@ -58,6 +58,7 @@ class ServoAx12a(Dynamixel):
         ### Implementierungsstart ###
         self.id = id
         super().__init__(self.id)
+
 
 
 
@@ -100,7 +101,9 @@ class ServoAx12a(Dynamixel):
     def getPresentSpeed(self):
         return Dynamixel._requestNByte(self, self.__PRESENT_SPEED, 2)
 
-    #def get
+
+    def getTemperature(self):
+        return Dynamixel._requestNByte(self, self.__PRESENT_TEMPERATURE, 1)
 
     # Get Goal position and speed, returns: [position, speed]
     # position: 0 ~ 1023, 
@@ -131,7 +134,7 @@ class ServoAx12a(Dynamixel):
     # 0->No return against all commands (Except PING Command), 1->Return only for the READ command, 2->Return for all commands
     def setReturnLevel(self, level, trigger = False):
         self.__RETURN_LEVEL = level
-        Dynamixel._writeNBytePkt(self, self.__RETURN_LEVEL, [level], trigger)
+        Dynamixel._writeNBytePkt(self, self.__RETURN_LEVEL, level, trigger)
 
 
 
