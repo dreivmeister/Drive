@@ -35,21 +35,24 @@ import math
 # time.sleep(1)
 
 
-id = 4
-position = - math.pi * (5/6) #radiant
+id = 15
+position =  math.pi * (5/6) #radiant
+
 servo = JointDrive(id, ccw=True)
 
 servo.setDesiredJointAngle(position, False)
 
 
-time.sleep(1)
-
-angle = servo.getCurrentJointAngle()
-print(f'Angle in rad: {angle}')
-
-
-speed = servo.getSpeedValue()
-print(f'Speed in rpm: {speed}')
+# servo.setDesiredJointAngle(position, False)
+#
+# time.sleep(1)
+#
+# angle = servo.getCurrentJointAngle()
+# print(f'Angle in rad: {angle}')
+#
+#
+# speed = servo.getSpeedValue()
+# print(f'Speed in rpm: {speed}')
 
 temp = servo.getTemperature()
 print(f'Temp in Cel.: {temp}')

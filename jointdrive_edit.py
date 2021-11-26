@@ -39,7 +39,7 @@ class JointDrive(ServoAx12a):
         self.aOffset = aOffset
         self.aMax = aMax
         self.aMin = aMin
-        super().__init__(self.id) #dont know if i need this
+        #super().__init__(self.id) #dont know if i need this
 
 
 
@@ -124,11 +124,7 @@ class JointDrive(ServoAx12a):
         else:
             word = ((CurrentSpeed[1] << 8) | CurrentSpeed[0])  # put high byte and low byte together and convert to decimal
 
-        print("hier")
-        print(word)
         return self.__convertTicksToSpeed(word)  # return decimal ticks to angle in radian
-
-
 
     # Set servo to desired angle and speed
     # angle -> in radian,

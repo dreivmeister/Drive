@@ -25,7 +25,7 @@ class ServoAx12a(Dynamixel):
     __MOVING_SPEED = 0x20                                                       # moving speed, 2 byte, read/write
     __PRESENT_POSITION = 0x24                                                   # current position, 2 byte, read only
     __PRESENT_SPEED = 0x26                                                      # current speed, 2 byte, read only
-    __PRESENT_TEMPERATURE = 0x43
+    __PRESENT_TEMPERATURE = 0x2B
 
     # Definition of protected class attributes
     #----------------------------------------------------------------------
@@ -57,7 +57,7 @@ class ServoAx12a(Dynamixel):
     def __init__(self, id):
         ### Implementierungsstart ###
         self.id = id
-        super().__init__(self.id)
+        #super().__init__(self.id)
 
 
 

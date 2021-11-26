@@ -76,7 +76,8 @@ class Dynamixel:
 
         pktReadData[2] = self.id # place id
 
-        pktReadData[3] = nByte + 2 #nBytes+op-code+2 (len of pkt)
+        if nByte != 1:
+            pktReadData[3] = nByte + 2 #nBytes+op-code+2 (len of pkt)
 
         if nByte == 1:
             pktReadData[5] = register #place register address
@@ -89,17 +90,18 @@ class Dynamixel:
         pktReadData[7] = self.__checkSum(pktReadData) #calc check sum
 
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
-        print("SEND: " + str(pktReadData))
+        print("SEND read: " + str(pktReadData))
 
+        print(nByte)
         pktStatus = self.__doReadStatusPkt(self.__STATUS_PACKET_BASE_LENGTH + nByte)
 
 
-        for i in pktStatus:
-            print(f'{i:02x}')
+        # for i in pktStatus:
+        #     print(f'{i:02x}')
         #print(pktStatus)
 
         if nByte == 1:
-            return pktStatus[-2:-1] #data byte
+            return pktStatus[-2] #data byte
         else:
             return pktStatus[-3:-1] #data bytes
 
@@ -113,6 +115,8 @@ class Dynamixel:
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
         pktReadStatus = self.__serial_port.read(nByte) # read status packet of servo
+        for i in pktReadStatus:
+             print(f'{i:02x}')
 
         self.error = pktReadStatus[4] # set error value with error bit
 
