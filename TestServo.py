@@ -38,9 +38,12 @@ import math
 id = 15
 position =  math.pi * (5/6) #radiant
 
+Dynamixel.showSerialLines()
+
 servo = JointDrive(id, ccw=True)
 
-servo.setDesiredJointAngle(position, False)
+servo.setDesiredJointAngle(position, True)
+Dynamixel.action()
 
 
 # servo.setDesiredJointAngle(position, False)

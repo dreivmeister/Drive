@@ -165,10 +165,7 @@ class Dynamixel:
 
 
 
-
-
-
-
+#kann man löschen-------------------------------------------------------------------------
     # Sends packet to servo in order to write data dword into servo memory
     # register -> register address of servo
     # data     -> list of words to write
@@ -221,9 +218,6 @@ class Dynamixel:
     # Start predefined action on servo with assigned id
     def action(self):
         return self.__doAction(self.id)
-
-    # def action(self, id):
-    #     return self.__doAction(id)
 
     # Get last error    
     def getLastError(self):

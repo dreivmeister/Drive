@@ -42,14 +42,6 @@ class JointDrive(ServoAx12a):
         #super().__init__(self.id) #dont know if i need this
 
 
-
-
-        #when initialized
-        # self.setDesiredJointAngle([150], True)
-        # self.setSpeedValue()
-        #...
-
-
     # Converts angle in radian to servo ticks
     # angle -> in radian, returns angle in servo ticks
     #lauft
@@ -91,8 +83,6 @@ class JointDrive(ServoAx12a):
     def getPresentTemperature(self):
         return ServoAx12a.getTemperature()
 
-
-
     # Set servo to desired angle
     # angle -> in radian,
     def setDesiredJointAngle(self, angle, trigger = False):
@@ -101,7 +91,7 @@ class JointDrive(ServoAx12a):
         else:
              angle = (5/6 * math.pi) - angle + self.aOffset
 
-        if angle > ServoAx12a._ANGLE_MAX_RAD or angle < ServoAx12a._ANGLE_MIN_RAD: #check for allowed position
+        if angle > self.aMax or angle < self.aMin: #check for allowed position
             return
 
         angle = self.__convertAngleToTicks(angle) #convert angle(rad) to motor ticks
@@ -112,8 +102,9 @@ class JointDrive(ServoAx12a):
     def setSpeedValue(self, speed = 0, trigger=False):
         if speed > ServoAx12a._SPEED_MAX_RPM or speed < 0:
             return
+
         speed = self.__convertSpeedToTicks(speed)
-        print(speed)
+
         ServoAx12a.setMovingSpeed(self, speed, trigger) #convert speed(rpm) to motor ticks
 
     def getSpeedValue(self):
@@ -141,10 +132,13 @@ class JointDrive(ServoAx12a):
     def setGoalPosSpeed(self, angle, speed, trigger = False):
         if angle > ServoAx12a._ANGLE_MAX_RAD or angle < ServoAx12a._ANGLE_MIN_RAD:  # check for allowed position
             return
+
         angle = self.__convertAngleToTicks(angle)  # convert angle(rad) to motor ticks
-        ServoAx12a.setGoalPosition(angle, trigger)
+        ServoAx12a.setGoalPosition(self, angle, trigger)
+
         if speed > ServoAx12a._SPEED_MAX_RPM or speed < 0:
             return
+
         speed = self.__convertSpeedToTicks(speed)
-        ServoAx12a.setMovingSpeed(speed, trigger)
+        ServoAx12a.setMovingSpeed(self, speed, trigger)
 

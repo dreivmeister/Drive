@@ -77,7 +77,7 @@ class ServoAx12a(Dynamixel):
     # Get goal position
     # returns: value of 0 to 1023, the unit is 0.29 degree.
     def getGoalPosition(self):
-        GoalPosition = Dynamixel._requestNByte(self, self.__GOAL_POSITION, 2) #has to return something
+        GoalPosition = Dynamixel._requestNByte(self, self.__GOAL_POSITION, 2)
         return GoalPosition * self._ANGLE_UNIT
 
     # Get moving speed
@@ -91,16 +91,15 @@ class ServoAx12a(Dynamixel):
     # Get present position
     # returns: value of 0 to 1023, the unit is 0.29 degree.
     def getPresentPosition(self):
-        #return self.__writeReadDataPkt(register, dtLen)
-        return Dynamixel._requestNByte(self, self.__PRESENT_POSITION, 2)
+        PresentPosition = Dynamixel._requestNByte(self, self.__PRESENT_POSITION, 2)
+        return PresentPosition
 
-    # Get present speeed
+    # Get present speed
     # returns: 0 to 1023, the unit is about 0.111rpm.
     #          If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
     #          If it is 1023, it is about 114rpm.
     def getPresentSpeed(self):
         return Dynamixel._requestNByte(self, self.__PRESENT_SPEED, 2)
-
 
     def getTemperature(self):
         return Dynamixel._requestNByte(self, self.__PRESENT_TEMPERATURE, 1)
@@ -142,6 +141,7 @@ class ServoAx12a(Dynamixel):
     # position: motor ticks
     def setGoalPosition(self, position, trigger = False):
         Dynamixel._writeNBytePkt(self, self.__GOAL_POSITION, position, trigger)
+
 
     # Set moving speed
     # speed: 0~1023 can be used, and the unit is about 0.111rpm.
