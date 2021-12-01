@@ -37,7 +37,7 @@ class Dynamixel:
     __pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]                                # Packet to request date
     __pktWriteByte = [255, 255, 0, 4, 3, 0, 0, 0]                               # Packet to write byte
     __pktWriteNByte = [255, 255, 0, 0, 3, 0]                                    # Base-packet to write n-bytes
-    __pktWriteWord = [255, 255, 0, 5, 3, 0, 0, 0, 0]                            # Packet to write word
+    __pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]                            # Packet to write word
 
     #---------------------------------------------------------------------------
     # Definition of private methods with implicit servo-id
@@ -46,11 +46,8 @@ class Dynamixel:
     # Constructor, sets id and defines error variable
     # id -> id of attached servo
     def __init__(self, id):
-        ### Implementierungsstart ###
         self.id = id
         self.error = 0
-
-
 
 
     # Start predefined action on servo
@@ -76,8 +73,7 @@ class Dynamixel:
 
         pktReadData[2] = self.id # place id
 
-        if nByte != 1:
-            pktReadData[3] = nByte + 2 #nBytes+op-code+2 (len of pkt)
+        #base length 4 always
 
         if nByte == 1:
             pktReadData[5] = register #place register address
@@ -92,13 +88,7 @@ class Dynamixel:
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
         print("SEND read: " + str(pktReadData))
 
-        print(nByte)
         pktStatus = self.__doReadStatusPkt(self.__STATUS_PACKET_BASE_LENGTH + nByte)
-
-
-        # for i in pktStatus:
-        #     print(f'{i:02x}')
-        #print(pktStatus)
 
         if nByte == 1:
             return pktStatus[-2] #data byte
@@ -115,8 +105,6 @@ class Dynamixel:
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
         pktReadStatus = self.__serial_port.read(nByte) # read status packet of servo
-        for i in pktReadStatus:
-             print(f'{i:02x}')
 
         self.error = pktReadStatus[4] # set error value with error bit
 
@@ -164,49 +152,40 @@ class Dynamixel:
         Dynamixel.__pktWriteNByte = [255, 255, 0, 0, 3, 0]
 
 
-
-#kann man löschen-------------------------------------------------------------------------
     # Sends packet to servo in order to write data dword into servo memory
     # register -> register address of servo
     # data     -> list of words to write
     # trigger  -> False -> command is directly executed, True -> command is delayed until action command
-    #__pktWriteWord = [255, 255, 0, 5, 3, 0, 0, 0, 0]
+    #__pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]
     #whats difference to write n bytes?
     def _writeNWordPkt(self, register, data, trigger):
         pktWriteWord = self.__pktWriteWord #copy base pkt
         pktWriteWord[2] = self.id #place id
 
-        if len(data) > 2:
-            pktWriteWord.extend([0]*(len(data)-2)) #if necessary extend base pkt
-            pktWriteWord[3] = len(data)+2 #adjust length parameter
-
-        pktWriteWord[5] = register #place register address
-
         if trigger:
             pktWriteWord[4] = 4
 
-        i = 6
-        for word in data: #place data
-            pktWriteWord[i] = word
-            i += 1
+        pktWriteWord[5] = register #place register address
+
+        pktWriteWord[6] = data[0] & 255 #position low byte
+        pktWriteWord[7] = data[0] >> 8 #position high byte
+
+        pktWriteWord[8] = data[1] & 255 #speed low byte
+        pktWriteWord[9] = data[1] >> 8 #speed high byte
+
 
         pktWriteWord[-1] = self.__checkSum(pktWriteWord) #place check sum
 
         self.__serial_port.write(pktWriteWord) #write pkt to servo
 
+
+#kann man löschen--------------------------------
         # Read data word from servo memory
         # register -> register address of servo
         # dtWLen   -> number of data words to read
-
     def _requestNWord(self, register, dtWlen=1):
         pass
 
-
-    # Read status packet, set error value and get return values from servo
-    # nByte -> number of bytes to read
-    def __readStatusPkt(self, nByte):
-        #dont know difference to __doReadStatusPkt
-        pass
 
     # Definition of public methods with implicit servo-id
     # Accessible from everywere    

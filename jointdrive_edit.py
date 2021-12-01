@@ -31,26 +31,24 @@ class JointDrive(ServoAx12a):
     # Constructor, defines the folowing variables: counterClockWise, angleOffset, angleMax, angleMin
     # id -> id of servo, cw -> rotating direction, aOffset -> angle offset,
     # aMax -> maximum angle allowed, aMin -> minimum angle allowed
-    def __init__(self, id, ccw = False, aOffset = 0.0, aMax = (5/3)*math.pi, aMin = 0):
+    def __init__(self, id, ccw=False, aOffset=0.0, aMax=(5 / 3) * math.pi, aMin=0):
         ### Implementierungsstart ###
         ### ID reicht erst einmal ###
+        super().__init__(id)
         self.id = id
         self.ccw = ccw
         self.aOffset = aOffset
         self.aMax = aMax
         self.aMin = aMin
-        #super().__init__(self.id) #dont know if i need this
 
 
     # Converts angle in radian to servo ticks
     # angle -> in radian, returns angle in servo ticks
-    #lauft
     def __convertAngleToTicks(self, angle):
         return math.floor(angle * self._ANGLE_UNIT)
 
     # Converts servo ticks to angle in radian
     # ticks -> servo ticks, returns angle in radian
-    #lauft
     def __convertTicksToAngle(self, ticks):
         return ticks * (1/self._ANGLE_UNIT)
 
@@ -66,7 +64,7 @@ class JointDrive(ServoAx12a):
 
 
 
-    # Public methods    
+    # Public methods
     #----------------------------------------------------------------------
     # Get current angle of servo
     # returns angle in radian
@@ -74,11 +72,11 @@ class JointDrive(ServoAx12a):
         CurrentAngle = ServoAx12a.getPresentPosition(self)
 
         if len(CurrentAngle) == 1:
-            word = CurrentAngle[0]
+            word = CurrentAngle[0] #single data byte
         else:
             word = ((CurrentAngle[1] << 8) | CurrentAngle[0]) #put high byte and low byte together and convert to decimal
 
-        return self.__convertTicksToAngle(word) #return decimal ticks to angle in radian
+        return self.__convertTicksToAngle(word) #convert ticks to angle in radian and return
 
     def getPresentTemperature(self):
         return ServoAx12a.getTemperature()
@@ -87,9 +85,9 @@ class JointDrive(ServoAx12a):
     # angle -> in radian,
     def setDesiredJointAngle(self, angle, trigger = False):
         if not self.ccw:
-             angle = (5/6 * math.pi) + angle + self.aOffset
+             angle = self._ANGLE_RADIAN_ZERO + angle + self.aOffset #clockwise
         else:
-             angle = (5/6 * math.pi) - angle + self.aOffset
+             angle = self._ANGLE_RADIAN_ZERO - angle + self.aOffset #counterclockwise
 
         if angle > self.aMax or angle < self.aMin: #check for allowed position
             return
@@ -115,14 +113,7 @@ class JointDrive(ServoAx12a):
         else:
             word = ((CurrentSpeed[1] << 8) | CurrentSpeed[0])  # put high byte and low byte together and convert to decimal
 
-        return self.__convertTicksToSpeed(word)  # return decimal ticks to angle in radian
-
-    # Set servo to desired angle and speed
-    # angle -> in radian,
-    # speed -> speed of movement in rpm, speed = 0 -> maximum speed
-    def setDesiredAngleSpeed(self, angle, speed = 0, trigger = False):
-        self.setDesiredJointAngle(angle, trigger)
-        self.setSpeedValue(speed, trigger)
+        return self.__convertTicksToSpeed(word)  #convert ticks to speed(rpm) and return
 
     # Set goal position and speed
     # position: 0 to 1023 is available. The unit is 0.29 degree.
@@ -134,11 +125,36 @@ class JointDrive(ServoAx12a):
             return
 
         angle = self.__convertAngleToTicks(angle)  # convert angle(rad) to motor ticks
-        ServoAx12a.setGoalPosition(self, angle, trigger)
 
         if speed > ServoAx12a._SPEED_MAX_RPM or speed < 0:
             return
 
         speed = self.__convertSpeedToTicks(speed)
-        ServoAx12a.setMovingSpeed(self, speed, trigger)
+
+        ServoAx12a.setGoalPositionMovingSpeed(self, angle, speed, trigger)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # Set servo to desired angle and speed
+    # angle -> in radian,
+    # speed -> speed of movement in rpm, speed = 0 -> maximum speed
+    def setDesiredAngleSpeed(self, angle, speed = 0, trigger = False):
+        self.setDesiredJointAngle(angle, trigger)
+        self.setSpeedValue(speed, trigger)
 

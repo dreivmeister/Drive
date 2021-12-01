@@ -55,11 +55,8 @@ class ServoAx12a(Dynamixel):
     #----------------------------------------------------------------------
     # Constructor, return level and return delay are set
     def __init__(self, id):
-        ### Implementierungsstart ###
+        super().__init__(id)
         self.id = id
-        #super().__init__(self.id)
-
-
 
 
     # Getter methods for servo Ax12a
@@ -135,13 +132,10 @@ class ServoAx12a(Dynamixel):
         self.__RETURN_LEVEL = level
         Dynamixel._writeNBytePkt(self, self.__RETURN_LEVEL, level, trigger)
 
-
-
     # Set goal position
     # position: motor ticks
     def setGoalPosition(self, position, trigger = False):
         Dynamixel._writeNBytePkt(self, self.__GOAL_POSITION, position, trigger)
-
 
     # Set moving speed
     # speed: 0~1023 can be used, and the unit is about 0.111rpm.
@@ -149,5 +143,9 @@ class ServoAx12a(Dynamixel):
     #        If it is 1023, it is about 114rpm.
     def setMovingSpeed(self, speed, trigger = False):
         Dynamixel._writeNBytePkt(self, self.__MOVING_SPEED, speed, trigger)
+
+    # Set goal position and moving speed via Sync Write
+    def setGoalPositionMovingSpeed(self, position, speed, trigger = False):
+        Dynamixel._writeNWordPkt(self, self.__GOAL_POSITION, [position, speed], trigger)
 
         
