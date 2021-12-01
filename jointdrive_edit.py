@@ -115,6 +115,7 @@ class JointDrive(ServoAx12a):
 
         return self.__convertTicksToSpeed(word)  #convert ticks to speed(rpm) and return
 
+    #untested
     # Set goal position and speed
     # position: 0 to 1023 is available. The unit is 0.29 degree.
     # speed:    0~1023 can be used, and the unit is about 0.111rpm.

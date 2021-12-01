@@ -75,18 +75,18 @@ class Dynamixel:
 
         #base length 4 always
 
+        pktReadData[5] = register  # place register address
+
         if nByte == 1:
-            pktReadData[5] = register #place register address
             pktReadData[6] = 1 #length of data
         else:
-            pktReadData[5] = register
             pktReadData[6] = 2 #length of data (bytes)
 
 
         pktReadData[7] = self.__checkSum(pktReadData) #calc check sum
 
         self.__serial_port.write(bytearray(pktReadData)) # sendCommand
-        print("SEND read: " + str(pktReadData))
+        #print("SEND read: " + str(pktReadData))
 
         pktStatus = self.__doReadStatusPkt(self.__STATUS_PACKET_BASE_LENGTH + nByte)
 
@@ -143,13 +143,13 @@ class Dynamixel:
         #start at index 6
 
         pktWriteNByte[6] = data & 255 #low byte
-        pktWriteNByte[7] = data >> 8 #high bytes
+        pktWriteNByte[7] = data >> 8 #high byte
 
         pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
 
         self.__serial_port.write(bytearray(pktWriteNByte)) #write pkt to servo
-        print("SEND:" + str(pktWriteNByte))
-        Dynamixel.__pktWriteNByte = [255, 255, 0, 0, 3, 0]
+        #print("SEND:" + str(pktWriteNByte))
+        Dynamixel.__pktWriteNByte = [255, 255, 0, 0, 3, 0] #reset for some reason
 
 
     # Sends packet to servo in order to write data dword into servo memory
@@ -157,13 +157,13 @@ class Dynamixel:
     # data     -> list of words to write
     # trigger  -> False -> command is directly executed, True -> command is delayed until action command
     #__pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]
-    #whats difference to write n bytes?
+    #When Sync Writing to different registers
     def _writeNWordPkt(self, register, data, trigger):
         pktWriteWord = self.__pktWriteWord #copy base pkt
         pktWriteWord[2] = self.id #place id
 
         if trigger:
-            pktWriteWord[4] = 4
+            pktWriteWord[4] = 4 #REG WRITE
 
         pktWriteWord[5] = register #place register address
 
@@ -179,7 +179,6 @@ class Dynamixel:
         self.__serial_port.write(pktWriteWord) #write pkt to servo
 
 
-#kann man löschen--------------------------------
         # Read data word from servo memory
         # register -> register address of servo
         # dtWLen   -> number of data words to read
