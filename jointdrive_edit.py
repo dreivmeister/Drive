@@ -18,7 +18,7 @@ class JointDrive(ServoAx12a):
 
     # Definition of public class attributes
     #----------------------------------------------------------------------
-    _ANGLE_RADIAN_ZERO = (ServoAx12a._ANGLE_MAX_DEGREE - ServoAx12a._ANGLE_MIN_DEGREE) * math.pi / 360
+    _ANGLE_RADIAN_ZERO = (ServoAx12a._ANGLE_MAX_DEGREE - ServoAx12a._ANGLE_MIN_DEGREE) * math.pi / 360 #5/6*pi
     # Zero angle offset of servo in radian
 
     # _ANGLE_UNIT = ServoAx12a._ANGLE_MAX_TICKS / ((ServoAx12a._ANGLE_MAX_DEGREE -

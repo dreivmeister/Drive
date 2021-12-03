@@ -37,7 +37,7 @@ class Dynamixel:
     __pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]                                # Packet to request date
     __pktWriteByte = [255, 255, 0, 4, 3, 0, 0, 0]                               # Packet to write byte
     __pktWriteNByte = [255, 255, 0, 0, 3, 0]                                    # Base-packet to write n-bytes
-    __pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]                            # Packet to write word
+    __pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]                   # Packet to write word
 
     #---------------------------------------------------------------------------
     # Definition of private methods with implicit servo-id
@@ -58,8 +58,13 @@ class Dynamixel:
 
         pktAction[2] = id # place id
 
+        pktAction[3] = 2
+
+        pktAction[5] = 5
+
         pktAction[-1] = self.__checkSum(pktAction) # place checksum
 
+        print(pktAction)
         self.__serial_port.write(bytearray(pktAction)) # sendCommand
 
 
@@ -166,7 +171,7 @@ class Dynamixel:
             pktWriteWord[4] = 4 #REG WRITE
 
         pktWriteWord[5] = register #place register address
-
+        print(data[0], data[1])
         pktWriteWord[6] = data[0] & 255 #position low byte
         pktWriteWord[7] = data[0] >> 8 #position high byte
 
@@ -175,7 +180,7 @@ class Dynamixel:
 
 
         pktWriteWord[-1] = self.__checkSum(pktWriteWord) #place check sum
-
+        print(pktWriteWord)
         self.__serial_port.write(pktWriteWord) #write pkt to servo
 
 
@@ -195,7 +200,7 @@ class Dynamixel:
 
     # Start predefined action on servo with assigned id
     def action(self):
-        return self.__doAction(self.id)
+        return self.__doAction()
 
     # Get last error    
     def getLastError(self):
