@@ -5,9 +5,9 @@ import math
 import serialPorts
 
 id = 15
-null_position = math.pi * (5/6)
-position = 0 #radiant, null position
-position1 = -math.pi * (5/6) #max position
+mid_pos = 0
+max_pos = (5/6)*math.pi
+min_pos = -(5/6)*math.pi
 speed20 = 20 #rpm
 speed60 = 60
 
@@ -17,22 +17,19 @@ speed60 = 60
 
 servo = JointDrive(id, ccw=False)
 
-servo.setGoalPosSpeed(null_position, speed20, False)
+servo.setDesiredJointAngle(mid_pos)
+time.sleep(2)
+servo.setDesiredJointAngle(min_pos)
+time.sleep(2)
+servo.setDesiredJointAngle(max_pos)
+
+
+servo.setGoalPosSpeed(min_pos, speed20, False)
 
 time.sleep(3)
 
-servo.setDesiredJointAngle(position, True)
+servo.setDesiredJointAngle(mid_pos, True)
 servo.action()
-
-time.sleep(3)
-
-servo.setSpeedValue(speed20, False)
-servo.setDesiredJointAngle(position, False)
-
-time.sleep(3)
-
-servo.setSpeedValue(speed60, False)
-servo.setDesiredJointAngle(position1, False)
 
 time.sleep(3)
 
@@ -44,14 +41,7 @@ time.sleep(1)
 speed = servo.getSpeedValue()
 print(f'Speed in rpm(present): {speed}')
 
-
 time.sleep(1)
 
 temp = servo.getTemperature()
 print(f'Temp in Cel.: {temp}')
-
-servo.setDesiredJointAngle(null_position)
-time.sleep(1)
-servo.setDesiredJointAngle(position)
-time.sleep(1)
-servo.setDesiredJointAngle(position1)
