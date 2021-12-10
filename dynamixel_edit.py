@@ -1,5 +1,5 @@
 from serialPorts import *
-
+import copy
 # QUESTIONS:
 #     -How to read/write words of data? For Bulk Read and Sync Write?
 #     -do error handling
@@ -23,7 +23,7 @@ class Dynamixel:
     # Definition of private class attributes, accessible only within own class
     #---------------------------------------------------------------------------
     # Define dynamixel constants
-    __DYNAMIXEL_PORT_NR = 0                                                     # Index of dynamixel line in list
+    __DYNAMIXEL_PORT_NR = 1                                                     # Index of dynamixel line in list
     __BAUDRATE = 1000000                                                        # Baudrate of dynamixel serial line
     __TIME_OUT_DEFAULT = 2                                                      # Default time out
     __DIRECT_ACTION = 3                                                         # Direct action command
@@ -36,8 +36,8 @@ class Dynamixel:
     __pktAction = [255, 255, 0, 2, 5, 0]                                        # Packet to invoke action
     __pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]                                # Packet to request date
     __pktWriteByte = [255, 255, 0, 4, 3, 0, 0, 0]                               # Packet to write byte
-    __pktWriteNByte = [255, 255, 0, 0, 3, 0]                                    # Base-packet to write n-bytes
-    __pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]                   # Packet to write word
+    __pktWriteNByte = [255, 255, 0, 0, 3, 0, 0]                                 # Base-packet to write n-bytes
+    __pktWriteWord = [255, 255, 0, 7, 3, 0, 0]                                  # Packet to write word
 
     #---------------------------------------------------------------------------
     # Definition of private methods with implicit servo-id
@@ -45,16 +45,17 @@ class Dynamixel:
     #---------------------------------------------------------------------------
     # Constructor, sets id and defines error variable
     # id -> id of attached servo
-    def __init__(self, id):
+    def __init__(self, id, prt):
         self.id = id
         self.error = 0
+        self.prt = prt
 
 
     # Start predefined action on servo
     # execute the registered Reg Write instruction
     # id -> id of servo to ping, without id -> broadcast action
     def __doAction(self, id = _ID_BROADCAST):
-        pktAction = self.__pktAction # copy base pkt
+        pktAction = copy.deepcopy(self.__pktAction) # copy base pkt
 
         pktAction[2] = id # place id
 
@@ -74,7 +75,7 @@ class Dynamixel:
     # nByte    -> number of bytes to read
     #__pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]
     def __writeReadDataPkt(self, register, nByte):
-        pktReadData = self.__pktReadData # copy base pkt
+        pktReadData = copy.deepcopy(self.__pktReadData) # copy base pkt
 
         pktReadData[2] = self.id # place id
 
@@ -110,7 +111,7 @@ class Dynamixel:
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
         pktReadStatus = self.__serial_port.read(nByte) # read status packet of servo
-
+        print(len(pktReadStatus))
         self.error = pktReadStatus[4] # set error value with error bit
 
         return pktReadStatus # return parameter values of status packet
@@ -130,58 +131,114 @@ class Dynamixel:
     # register -> register address of servo
     # data     -> list of bytes to write
     # trigger  -> False -> command is directly executed, True -> command is delayed until action command
-    #__pktWriteNByte = [255, 255, 0, 0, 3, 0]
+    #__pktWriteNByte = [255, 255, 0, 0, 3, 0, 0]
+    # e.g. data = [200,300,1020]
     def _writeNBytePkt(self, register, data, trigger):
-        pktWriteNByte = Dynamixel.__pktWriteNByte
+        nBytes = len(data)
+        pktWriteNByte = copy.deepcopy(self.__pktWriteNByte)
         pktWriteNByte[2] = self.id
 
-        pktWriteNByte.extend([0]*3) #data byte(s) + register byte
+        pktWriteNByte.extend([0]*nBytes) #data byte(s) + register byte
 
-        pktWriteNByte[3] = 5 #opcode-data low-data high- +2
+        pktWriteNByte[3] = nBytes+3 #data bytes + register + 2
+
+        #REG WRITE
+        if trigger:
+            pktWriteNByte[4] = 4
 
         pktWriteNByte[5] = register # register address
 
-        if trigger:
-            pktWriteNByte[4] = 4 # REG WRITE
-
-        #place bytes
-        #start at index 6
-
-        pktWriteNByte[6] = data & 255 #low byte
-        pktWriteNByte[7] = data >> 8 #high byte
+        i = 6
+        for date in data:
+            pktWriteNByte[i] = date
+            i += 1
 
         pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
 
         self.__serial_port.write(bytearray(pktWriteNByte)) #write pkt to servo
         #print("SEND:" + str(pktWriteNByte))
-        Dynamixel.__pktWriteNByte = [255, 255, 0, 0, 3, 0] #reset for some reason
 
 
-    # Sends packet to servo in order to write data dword into servo memory
-    # register -> register address of servo
-    # data     -> list of words to write
-    # trigger  -> False -> command is directly executed, True -> command is delayed until action command
-    #__pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]
-    #When Sync Writing to different registers
     def _writeNWordPkt(self, register, data, trigger):
-        pktWriteWord = self.__pktWriteWord #copy base pkt
-        pktWriteWord[2] = self.id #place id
+        nBytes = len(data)*2
+        #print(data)
+        pktWriteNWord = copy.deepcopy(self.__pktWriteWord) #copy base pkt
+        pktWriteNWord[2] = self.id
 
+        pktWriteNWord.extend([0]*nBytes) #data byte(s) + register byte
+
+        pktWriteNWord[3] = nBytes+3 #data bytes + register + 2
+
+        #REG WRITE
         if trigger:
-            pktWriteWord[4] = 4 #REG WRITE
+            pktWriteNWord[4] = 4
 
-        pktWriteWord[5] = register #place register address
-        print(data[0], data[1])
-        pktWriteWord[6] = data[0] & 255 #position low byte
-        pktWriteWord[7] = data[0] >> 8 #position high byte
+        pktWriteNWord[5] = register # register address
 
-        pktWriteWord[8] = data[1] & 255 #speed low byte
-        pktWriteWord[9] = data[1] >> 8 #speed high byte
+        i = 6
+        for date in data:
+            pktWriteNWord[i] = date & 255
+            pktWriteNWord[i+1] = date >> 8
+            i += 2
+
+        pktWriteNWord[-1] = self.__checkSum(pktWriteNWord)
+
+        self.__serial_port.write(bytearray(pktWriteNWord)) #write pkt to servo
+        if self.prt:
+            print("SEND:" + str(pktWriteNWord))
 
 
-        pktWriteWord[-1] = self.__checkSum(pktWriteWord) #place check sum
-        print(pktWriteWord)
-        self.__serial_port.write(pktWriteWord) #write pkt to servo
+
+        # Sends packet to servo in order to write n data bytes into servo memory
+        # register -> register address of servo
+        # data     -> list of bytes to write
+        # trigger  -> False -> command is directly executed, True -> command is delayed until action command
+        # __pktWriteNByte = [255, 255, 0, 0, 3, 0]
+        def _writeNBytePkt(self, register, data, trigger, byteNum):
+            pktWriteNByte = Dynamixel.__pktWriteNByte
+            pktWriteNByte[2] = self.id
+
+            pktWriteNByte.extend([0] * (byteNum + 2))  # data byte(s) + register byte
+            pktWriteNByte[3] = byteNum + 2  # length
+            pktWriteNByte[5] = register  # register address
+
+            if trigger:
+                pktWriteNByte[4] = 4  # REG WRITE
+
+            # place bytes
+            # start at index 6
+            for i in range(6, 6 + byteNum, 2):
+                pktWriteNByte[i] = data[i - 6] & 255  # low byte
+                pktWriteNByte[i + 1] = data[i - 6] >> 8  # high byte
+
+            pktWriteNByte[-1] = self.__checkSum(pktWriteNByte)
+
+            self.__serial_port.write(bytearray(pktWriteNByte))  # write pkt to servo
+            # print("SEND:" + str(pktWriteNByte))
+            Dynamixel.__pktWriteNByte = [255, 255, 0, 0, 3, 0]  # reset for some reason
+
+        # Sends packet to servo in order to write data dword into servo memory
+        # register -> register address of servo
+        # data     -> list of words to write
+        # trigger  -> False -> command is directly executed, True -> command is delayed until action command
+        # __pktWriteWord = [255, 255, 0, 7, 3, 0, 0, 0, 0, 0, 0]
+        # When Sync Writing to different registers
+        def _writeNWordPkt(self, register, data, trigger, wordNum):
+            pktWriteWord = self.__pktWriteWord  # copy base pkt
+            pktWriteWord[2] = self.id  # place id
+
+            if trigger:
+                pktWriteWord[4] = 4  # REG WRITE
+
+            pktWriteWord[5] = register  # place register address
+            # print(data[0], data[1])
+            for i in range(wordNum):
+                pktWriteWord[i + 6] = data[i] & 255  # position low byte
+                pktWriteWord[i + 7] = data[i] >> 8  # position high byte
+
+            pktWriteWord[-1] = self.__checkSum(pktWriteWord)  # place check sum
+            # print(pktWriteWord)
+            self.__serial_port.write(pktWriteWord)  # write pkt to servo
 
 
         # Read data word from servo memory
