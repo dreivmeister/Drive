@@ -14,13 +14,18 @@ l = serialPorts.serialPortList()
 print(l)
 #port = serial.Serial(port=str(l[0]), baudrate=1000000)
 
-servo = JointDrive(id, ccw=False, prt=True)
+servo = JointDrive(id, ccw=False, prt=True, aMax=math.radians(90), aMin=math.radians(-90))
 
 print(servo.aMax)
 print(servo.aMin)
 
 
-servo.setGoalPosSpeed([-(5/6)*math.pi, 20, 200])
+servo.setDesiredJointAngle([math.radians(100)])
+time.sleep(2)
+print(math.degrees(servo.getCurrentJointAngle()))
+
+
+#servo.setGoalPosSpeed([-(5/6)*math.pi, 20, 200])
 
 # servo.setSpeedValue(speed60)
 # time.sleep(1)

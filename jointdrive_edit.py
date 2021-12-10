@@ -94,8 +94,10 @@ class JointDrive(ServoAx12a):
     def setDesiredJointAngle(self, angle, trigger = False):
         for i in range(0, len(angle)):
 
-            if angle[i] > self.aMax or angle[i] < self.aMin: #check for allowed position
-                return
+            if angle[i] > self.aMax:
+                angle[i] = self.aMax
+            elif angle[i] < self.aMin:
+                angle[i] = self.aMin
 
             if not self.ccw:
                 angle[i] = self._ANGLE_RADIAN_ZERO + angle[i] + self.aOffset #clockwise
@@ -103,7 +105,7 @@ class JointDrive(ServoAx12a):
                 angle[i] = self._ANGLE_RADIAN_ZERO - angle[i] + self.aOffset #counterclockwise
 
             angle[i] = self.__convertAngleToTicks(angle[i]) #convert angle(rad) to motor ticks
-            print(angle[i])
+
         ServoAx12a.setGoalPosition(self, angle, trigger)
 
     # Set speed value of servo

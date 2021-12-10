@@ -111,7 +111,6 @@ class Dynamixel:
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
         pktReadStatus = self.__serial_port.read(nByte) # read status packet of servo
-        print(len(pktReadStatus))
         self.error = pktReadStatus[4] # set error value with error bit
 
         return pktReadStatus # return parameter values of status packet
@@ -161,7 +160,6 @@ class Dynamixel:
 
     def _writeNWordPkt(self, register, data, trigger):
         nBytes = len(data)*2
-        #print(data)
         pktWriteNWord = copy.deepcopy(self.__pktWriteWord) #copy base pkt
         pktWriteNWord[2] = self.id
 
