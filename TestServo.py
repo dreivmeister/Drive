@@ -3,26 +3,39 @@ from jointdrive_edit import *
 import math
 import serialPorts
 
-id = 15
-mid_pos = 0
-max_pos = (5/6)*math.pi
-min_pos = -(5/6)*math.pi
-speed20 = 20 #rpm
-speed60 = 60
+id = 4
+mid_pos = [0]
+max_pos = [(5/6)*math.pi]
+min_pos = [-(5/6)*math.pi]
+speed20 = [20] #rpm
+speed60 = [60]
 
 l = serialPorts.serialPortList()
 print(l)
 #port = serial.Serial(port=str(l[0]), baudrate=1000000)
 
-servo = JointDrive(id, ccw=False)
+servo = JointDrive(id, ccw=False, prt=True, aMax=math.radians(90), aMin=math.radians(-90))
 
-servo.setDesiredJointAngle(mid_pos)
+print(servo.aMax)
+print(servo.aMin)
 
 
+servo.setDesiredJointAngle([math.radians(100)])
 time.sleep(2)
-servo.setDesiredJointAngle(min_pos)
-time.sleep(2)
-servo.setDesiredJointAngle(max_pos)
+print(math.degrees(servo.getCurrentJointAngle()))
+
+
+#servo.setGoalPosSpeed([-(5/6)*math.pi, 20, 200])
+
+# servo.setSpeedValue(speed60)
+# time.sleep(1)
+# servo.setDesiredJointAngle(max_pos)
+# print(servo.getCurrentJointAngle())
+
+# time.sleep(2)
+# servo.setDesiredJointAngle(min_pos)
+# time.sleep(2)
+# servo.setDesiredJointAngle(max_pos)
 
 
 # servo.setGoalPosSpeed(min_pos, speed20, False)

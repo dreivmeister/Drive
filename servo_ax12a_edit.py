@@ -37,9 +37,10 @@ class ServoAx12a(Dynamixel):
     _ANGLE_MAX_RAD = (5/3)*math.pi                                                      # highest rad reachable (300 deg)
     _ANGLE_MIN_RAD = 0                                                          # lowest rad reachable
     _ANGLE_UNIT = 0.29                                                          # 0.29 degree per tick
-    _SPEED_UNIT = (1023/113.5)                                                         # 0.111 rpm per tick
+    _SPEED_UNIT = (1023/113.5)                                                  # 0.111 rpm per tick
     _SPEED_MAX_TICKS = 1023                                                     # 1023 
     _SPEED_MAX_RPM = 1023 * 0.111                                               # 1023 * 0.111 = 113.5 rpm
+    _SPEED_MIN_RPM = 0.111
 
     # Definition of public class attributes
     #----------------------------------------------------------------------
@@ -54,9 +55,10 @@ class ServoAx12a(Dynamixel):
     # Definition of private methods
     #----------------------------------------------------------------------
     # Constructor, return level and return delay are set
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, id, prt):
+        super().__init__(id, prt)
         self.id = id
+        self.prt = prt
 
 
     # Getter methods for servo Ax12a
@@ -77,6 +79,12 @@ class ServoAx12a(Dynamixel):
         GoalPosition = Dynamixel._requestNByte(self, self.__GOAL_POSITION, 2)
         return GoalPosition * self._ANGLE_UNIT
 
+    # Get present position
+    # returns: value of 0 to 1023, the unit is 0.29 degree.
+    def getPresentPosition(self):
+        PresentPosition = Dynamixel._requestNByte(self, self.__PRESENT_POSITION, 2)
+        return PresentPosition
+
     # Get moving speed
     # returns: 0 to 1023, the unit is about 0.111rpm.
     #          If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
@@ -84,12 +92,6 @@ class ServoAx12a(Dynamixel):
     def getMovingSpeed(self):
         MovingSpeed = Dynamixel._requestNByte(self, self.__MOVING_SPEED, 2)
         return MovingSpeed * self._SPEED_UNIT
-
-    # Get present position
-    # returns: value of 0 to 1023, the unit is 0.29 degree.
-    def getPresentPosition(self):
-        PresentPosition = Dynamixel._requestNByte(self, self.__PRESENT_POSITION, 2)
-        return PresentPosition
 
     # Get present speed
     # returns: 0 to 1023, the unit is about 0.111rpm.
@@ -107,7 +109,7 @@ class ServoAx12a(Dynamixel):
     #           If it is 0, it means the maximum rpm of the motor is used without controlling the speed.
     #           If it is 1023, it is about 114rpm.
     def getGoalPosSpeed(self):
-        return [self.getGoalPosition(), self.getPresentSpeed()]
+        return Dynamixel._requestNWord(self, self.__GOAL_POSITION, 4)
 
     # Get present position and speed, returns: [position, speed]
     # position: 0 ~ 1023, 
@@ -115,7 +117,7 @@ class ServoAx12a(Dynamixel):
     #           If it 0, it means the maximum rpm of the motor is used without controlling the speed.
     #           If it is 1023, it is about 114rpm.
     def getPresPosSpeed(self):
-        return [self.getPresentPosition(), self.getPresentSpeed()]
+        return Dynamixel._requestNWord(self, self.__PRESENT_POSITION, 4)
 
 
     # Setter methods for servo Ax12a
@@ -135,17 +137,17 @@ class ServoAx12a(Dynamixel):
     # Set goal position
     # position: motor ticks
     def setGoalPosition(self, position, trigger = False):
-        Dynamixel._writeNBytePkt(self, self.__GOAL_POSITION, position, trigger)
+        Dynamixel._writeNWordPkt(self, self.__GOAL_POSITION, position, trigger)
 
     # Set moving speed
     # speed: 0~1023 can be used, and the unit is about 0.111rpm.
     #        If it is set to 0, it means the maximum rpm of the motor is used without controlling the speed.
     #        If it is 1023, it is about 114rpm.
     def setMovingSpeed(self, speed, trigger = False):
-        Dynamixel._writeNBytePkt(self, self.__MOVING_SPEED, speed, trigger)
+        Dynamixel._writeNWordPkt(self, self.__MOVING_SPEED, speed, trigger)
 
     # Set goal position and moving speed via Sync Write
-    def setGoalPositionMovingSpeed(self, position, speed, trigger = False):
-        Dynamixel._writeNWordPkt(self, self.__GOAL_POSITION, [position, speed], trigger)
+    def setGoalPositionMovingSpeed(self, data, trigger = False):
+        Dynamixel._writeNWordPkt(self, self.__GOAL_POSITION, data, trigger)
 
         
