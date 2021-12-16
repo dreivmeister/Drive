@@ -51,6 +51,13 @@ class Dynamixel:
         self.prt = prt
 
 
+
+    # Calculates check sum of packet list
+    def __checkSum(self, pkt):
+        s = sum(pkt[2:-1])
+        return (~s) & 0xFF
+
+
     # Start predefined action on servo
     # execute the registered Reg Write instruction
     # id -> id of servo to ping, without id -> broadcast action
@@ -58,10 +65,6 @@ class Dynamixel:
         pktAction = copy.deepcopy(self.__pktAction) # copy base pkt
 
         pktAction[2] = id # place id
-
-        pktAction[3] = 2
-
-        pktAction[5] = 5
 
         pktAction[-1] = self.__checkSum(pktAction) # place checksum
 
@@ -99,14 +102,6 @@ class Dynamixel:
         return pktStatus[(-1-nByte):-1]
 
 
-
-
-
-    # Calculates check sum of packet list
-    def __checkSum(self, pkt):
-        s = sum(pkt[2:-1])
-        return (~s) & 0xFF
-
     # Read status packet, set error value and get return values from servo
     # nByte -> number of bytes to read
     def __doReadStatusPkt(self, nByte):
@@ -116,16 +111,10 @@ class Dynamixel:
 
         return pktReadStatus # return parameter values of status packet
 
+
     # Definition of protected methods
     # Accessible within own and derived classes
     #---------------------------------------------------------------------------
-    # Read data byte from servo memory
-    # register -> register address of servo
-    # dtLen    -> number of data bytes to read
-    #__pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]
-    def _requestNByte(self, register, dtLen = 1):
-        return self.__writeReadDataPkt(register, dtLen)
-
 
     # Sends packet to servo in order to write n data bytes into servo memory
     # register -> register address of servo
@@ -159,6 +148,14 @@ class Dynamixel:
             print(pktWriteNByte)
 
         self.__serial_port.write(bytearray(pktWriteNByte)) #write pkt to servo
+
+
+    # Read data byte from servo memory
+    # register -> register address of servo
+    # dtLen    -> number of data bytes to read
+    #__pktReadData = [255, 255, 0, 4, 2, 0, 0, 0]
+    def _requestNByte(self, register, dtLen = 1):
+        return self.__writeReadDataPkt(register, dtLen)
 
 
     def _writeNWordPkt(self, register, data, trigger):
