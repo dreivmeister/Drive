@@ -22,8 +22,6 @@ servo.setDesiredJointAngle([math.radians(0)], trigger=True)
 
 
 
-
-
 x = -150
 for i in range(1, 114, 10):
     x *= -1
@@ -31,10 +29,12 @@ for i in range(1, 114, 10):
     servo1.setGoalPosSpeed([math.radians(x), i], trigger=True)
     servo2.setGoalPosSpeed([math.radians(x), i], trigger=True)
     servo3.setGoalPosSpeed([math.radians(x), i], trigger=True)
-    
+
     time.sleep(1)
 
     servo.action()
     y = str(servo.getSpeedValue())
     time.sleep(1)
     print(y)
+    time.sleep(1)
+    print(servo.getPresentTemperature())

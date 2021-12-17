@@ -67,7 +67,7 @@ class JointDrive(ServoAx12a):
 
 
     def getPresentTemperature(self):
-        return ServoAx12a.getTemperature(self)
+        return ServoAx12a.getTemperature(self).hex()
 
     # Set servo to desired angle
     # angle -> in radian,
